@@ -40,39 +40,36 @@
         </header>
         <div class="container">
             <div class="row" id="selector">
-                <div class="col-sm-12 col-md-6 mt-1">
-                    <select id="selectcategoria" class="custom-select" onchange='window.location="Controller?op=categoria&idCategoria="+this.value'>
-                        <option value="" selected>Selecciona Categoría</option>
-                        <% 
-                            for(Categoria categoria: categorias){
-                        %>
-                        <option value="<%=categoria.getId() %>"><%=categoria.getNombre() %></option>
-                        <%  } %>
-                    </select>
-                </div>
+                <form class="col-sm-12 col-md-6 mt-1" action="Controller" method="post" >
+                    <input type="hidden" name="op" value="categoria">
+                    <select name="idCategoria" id="selectCategoria" class="custom-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>Selecciona Categoría</option>
+                    <% 
+                        for(Categoria categoria: categorias){
+                    %>
+                    <option value="<%=categoria.getId() %>"><%=categoria.getNombre() %></option>
+                    <%  } %>
+                </select>
+                </form>
                 <div class="col-sm-12 col-md-6 text-center">
-                    <button type="button" class="btn btn-link">
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleModal">
                         <img src="img/surprise-box.png" />
                     </button>
                     <% 
                         if(viewMejores == false){
                     %>
-                    <button type="button" class="btn btn-link" onclick='window.location="Controller?op=mejores"'>
-                        Mejores Chistes
-                    </button>
+                            <a class="btn btn-link" href="Controller?op=mejores">Mejores Chistes</a>
                     <%
                         } else {
                     %>
-                    <button type="button" class="btn btn-link" onclick='window.location="Controller?op=categoria&idCategoria=<%=idCategoria %>"'>
-                       Por categorias
-                    </button>
+                            <a class="btn btn-link" href="Controller?op=categoria&idCategoria=<%=idCategoria %>">Por categorias</a>
                     <%  } %>
                 </div>
 
             </div>
             <div class="row">
                 <div class="col text-center">
-                    <button type="button" class="btn btn-link">
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#modalChiste">
                         <img src="img/jester.png" />
                     </button>
                 </div>
@@ -111,7 +108,6 @@
                         <a href="Controller?op=votar&puntos=4&idchiste=<%=chiste.getId()%>">&#9733;</a>
                         <a href="Controller?op=votar&puntos=5&idchiste=<%=chiste.getId()%>">&#9733;</a>
                     </span>
-                    <p> Puntos: <%=total %></p>
                 </div>
                 <%  
                         total = 0;
@@ -124,18 +120,74 @@
             <h1>Chistes - Azarquiel</h1>
         </footer>
     </div>
+        
+    <!-- Modal Añadir Chiste -->
+    
+        
+    <!-- Modal Añadir Chiste -->
+    <div class="modal fade" id="modalChiste" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Nuevo Chiste</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="textApodo" class="col-sm-3 col-form-label">Apodo</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="textApodo" >
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="textDescrpcion" class="col-sm-3 col-form-label">Descripción</label>
+                            <div class="col-sm-9">
+                                <textarea class="form-control" id="textDescripcion"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="selectChiste" class="col-sm-3 col-form-label">Categoría</label>
+                            <div class="col-sm-9">
+                                <select id="selectChiste" class="custom-select">
+                                    <option value="" disabled selected>Selecciona Categoría</option>
+                                    <% 
+                                        for(Categoria categoria: categorias){
+                                    %>
+                                    <option value="<%=categoria.getId() %>"><%=categoria.getNombre() %></option>
+                                    <%  } %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="textTitulo" class="col-sm-3 col-form-label">Título</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="textTitulo" >
+                            </div>
+                        </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary">Guardar</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="myjs.js"></script>
+    <script type="text/javascript" src="js/myjs.js"></script>
     
     <% 
-        if(idCategoria!=null || idCategoria!=""){ 
+        if(idCategoria!=null && idCategoria!=""){ 
     %>
             <script type="text/javascript">
-                $('#selectcategoria').val('<%= idCategoria %>')
+                $('#selectCategoria').val('<%= idCategoria %>')
             </script>
     <%  } %>
   </body>

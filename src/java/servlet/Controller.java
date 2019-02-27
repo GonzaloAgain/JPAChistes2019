@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -49,6 +50,7 @@ public class Controller extends HttpServlet {
         String sql;
         Query query;
         EntityManager em = null;
+        EntityTransaction transaction;    
         
         if (em == null) {
             em = JPAUtil.getEntityManagerFactory().createEntityManager();
@@ -65,13 +67,13 @@ public class Controller extends HttpServlet {
             
         } else if(op.equals("categoria")){
             String idcategoria = request.getParameter("idCategoria");
+            System.out.println("La categoria es: "+idcategoria);
             List <Chiste> chistes = null;
-            if (!idcategoria.equals("")) {
-                sql = "select c from Chiste c where c.idcategoria.id = :id";
-                query = em.createQuery(sql);
-                query.setParameter("id",Short.parseShort(idcategoria));
-                chistes = query.getResultList();  
-            }
+            
+            sql = "select c from Chiste c where c.idcategoria.id = :id";
+            query = em.createQuery(sql);
+            query.setParameter("id",Short.parseShort(idcategoria));
+            chistes = query.getResultList();
             
             session.setAttribute("chistes",chistes);
             session.setAttribute("idCategoria",idcategoria);
@@ -95,9 +97,10 @@ public class Controller extends HttpServlet {
             votacion.setIdchiste(chiste);
             votacion.setPuntos(puntos);
             
-            em.getTransaction().begin();
+            transaction = em.getTransaction();
+            transaction.begin();
             em.persist(votacion);
-            em.getTransaction().commit();
+            transaction.commit();
             em.getEntityManagerFactory().getCache().evictAll();
             
             Boolean mejores = (Boolean) session.getAttribute("viewMejores");
@@ -105,13 +108,12 @@ public class Controller extends HttpServlet {
             
             if (mejores == false) {
                 String idcategoria = (String) session.getAttribute("idCategoria");
-                if (!idcategoria.equals("")) {
-                    sql = "select c from Chiste c where c.idcategoria.id = :id";
-                    query = em.createQuery(sql);
-                    query.setParameter("id",Short.parseShort(idcategoria));
-                    chistes = query.getResultList();
-                    
-                } 
+
+                sql = "select c from Chiste c where c.idcategoria.id = :id";
+                query = em.createQuery(sql);
+                query.setParameter("id",Short.parseShort(idcategoria));
+                chistes = query.getResultList();
+
             } else {
                 sql = "select p.idchiste from Puntos p group by p.idchiste order by avg(p.puntos) DESC";
                 query = em.createQuery(sql);
