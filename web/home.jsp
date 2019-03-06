@@ -23,7 +23,7 @@
     <link type="text/css" rel="stylesheet" href="css/mycss.css"/>
     
 
-    <title>Hello, world!</title>
+    <title>Chistes</title>
   </head>
   <body>
     <% 
@@ -52,7 +52,7 @@
                 </select>
                 </form>
                 <div class="col-sm-12 col-md-6 text-center">
-                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleModal">
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#modalCategoria">
                         <img src="img/surprise-box.png" />
                     </button>
                     <% 
@@ -113,6 +113,7 @@
                         total = 0;
                     } 
                 %>
+                <div class="col-sm-12 my-2" id="nuevoChiste"></div>
             </div>
             <%  } %>
         </div>
@@ -121,8 +122,33 @@
         </footer>
     </div>
         
-    <!-- Modal Añadir Chiste -->
-    
+    <!-- Modal Añadir Categoria -->
+    <div class="modal fade" id="modalCategoria" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Nueva Categoría</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="Controller" method="post">
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <input type="text" name="nuevaCategoria" class="form-control" id="inputCategoria">
+                        </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="op" value="addCategoria">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
         
     <!-- Modal Añadir Chiste -->
     <div class="modal fade" id="modalChiste" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -134,24 +160,24 @@
                       <span aria-hidden="true">&times;</span>
                   </button>
                 </div>
-                <form>
+                <form id="formularioChiste">
                     <div class="modal-body">
                         <div class="form-group row">
                             <label for="textApodo" class="col-sm-3 col-form-label">Apodo</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="textApodo" >
+                                <input type="text" class="form-control" id="textApodo" name="textApodo" >
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="textDescrpcion" class="col-sm-3 col-form-label">Descripción</label>
                             <div class="col-sm-9">
-                                <textarea class="form-control" id="textDescripcion"></textarea>
+                                <textarea class="form-control" id="textDescripcion" name="textDescripcion" ></textarea>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="selectChiste" class="col-sm-3 col-form-label">Categoría</label>
                             <div class="col-sm-9">
-                                <select id="selectChiste" class="custom-select">
+                                <select id="selectChiste" name="selectChiste" class="custom-select">
                                     <option value="" disabled selected>Selecciona Categoría</option>
                                     <% 
                                         for(Categoria categoria: categorias){
@@ -164,14 +190,17 @@
                         <div class="form-group row">
                             <label for="textTitulo" class="col-sm-3 col-form-label">Título</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="textTitulo" >
+                                <input type="text" class="form-control" id="textTitulo" name="textTitulo" >
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="op" value="nuevoChiste">
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            <button type="button" class="btn btn-primary">Guardar</button>
-                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" id="btnNuevoChiste" class="btn btn-primary">Guardar</button>
+                    </div>
                 </form>
             </div>
         </div>

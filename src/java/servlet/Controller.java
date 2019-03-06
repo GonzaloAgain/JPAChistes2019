@@ -50,7 +50,9 @@ public class Controller extends HttpServlet {
         String sql;
         Query query;
         EntityManager em = null;
-        EntityTransaction transaction;    
+        EntityTransaction transaction;
+        List <Chiste> chistes = null;
+        List<Categoria> categorias = null;
         
         if (em == null) {
             em = JPAUtil.getEntityManagerFactory().createEntityManager();
@@ -61,14 +63,15 @@ public class Controller extends HttpServlet {
         
         if (op.equals("inicio")) {
             query = em.createNamedQuery("Categoria.findAll");
-            List<Categoria> categorias = query.getResultList();           
+            categorias = query.getResultList();           
             session.setAttribute("categorias",categorias);
             session.setAttribute("viewMejores",false);
             
+            dispatcher = request.getRequestDispatcher("home.jsp");
+            dispatcher.forward(request, response);
+            
         } else if(op.equals("categoria")){
             String idcategoria = request.getParameter("idCategoria");
-            System.out.println("La categoria es: "+idcategoria);
-            List <Chiste> chistes = null;
             
             sql = "select c from Chiste c where c.idcategoria.id = :id";
             query = em.createQuery(sql);
@@ -79,13 +82,19 @@ public class Controller extends HttpServlet {
             session.setAttribute("idCategoria",idcategoria);
             session.setAttribute("viewMejores",false);
             
+            dispatcher = request.getRequestDispatcher("home.jsp");
+            dispatcher.forward(request, response);
+            
         } else if(op.equals("mejores")){
             sql = "select p.idchiste from Puntos p group by p.idchiste order by avg(p.puntos) DESC";
             query = em.createQuery(sql);
-            List <Chiste> chistes = query.getResultList();
+            chistes = query.getResultList();
             
             session.setAttribute("chistes",chistes);
             session.setAttribute("viewMejores",true);
+            
+            dispatcher = request.getRequestDispatcher("home.jsp");
+            dispatcher.forward(request, response);
             
         } else if(op.equals("votar")){
             
@@ -101,10 +110,12 @@ public class Controller extends HttpServlet {
             transaction.begin();
             em.persist(votacion);
             transaction.commit();
+            em.refresh(chiste);
+            Categoria categoria = em.find(Categoria.class, chiste.getIdcategoria().getId());
+            em.refresh(categoria);
             em.getEntityManagerFactory().getCache().evictAll();
             
             Boolean mejores = (Boolean) session.getAttribute("viewMejores");
-            List <Chiste> chistes = null;
             
             if (mejores == false) {
                 String idcategoria = (String) session.getAttribute("idCategoria");
@@ -122,10 +133,60 @@ public class Controller extends HttpServlet {
             }
 
             session.setAttribute("chistes",chistes);
+            
+            dispatcher = request.getRequestDispatcher("home.jsp");
+            dispatcher.forward(request, response);
+            
+        } else if (op.equals("addCategoria")) {
+            String nombre = request.getParameter("nuevaCategoria");
+            Categoria categoria = new Categoria();
+            categoria.setNombre(nombre);
+            
+            transaction = em.getTransaction();
+            transaction.begin();
+            em.persist(categoria);
+            transaction.commit();
+            em.getEntityManagerFactory().getCache().evictAll();
+            
+            query = em.createNamedQuery("Categoria.findAll");
+            categorias = query.getResultList();           
+            session.setAttribute("categorias",categorias);
+            
+            dispatcher = request.getRequestDispatcher("home.jsp");
+            dispatcher.forward(request, response);
+            
+        } else if (op.equals("addChiste")) {
+            String apodo = request.getParameter("textApodo");
+            String descripcion = request.getParameter("textDescripcion");
+            String idCategoria = request.getParameter("selectChiste");
+            Categoria categoria = em.find(Categoria.class, Short.parseShort(idCategoria));
+            String titulo = request.getParameter("textTitulo");
+            
+            Chiste chiste = new Chiste();
+            chiste.setAdopo(apodo);
+            chiste.setDescripcion(descripcion);
+            chiste.setTitulo(titulo);
+            chiste.setIdcategoria(categoria);
+            
+            transaction = em.getTransaction();
+            transaction.begin();
+            em.persist(chiste);
+            transaction.commit();
+            em.getEntityManagerFactory().getCache().evictAll();
+            
+            String categoriaActual = (String) session.getAttribute("idCategoria");
+            
+            if (idCategoria.equals(categoriaActual)) {
+                
+                sql = "select c from Chiste c where c.id in (select max(c.id) from Chiste c)";
+                query = em.createQuery(sql);
+                Chiste chisteIntroducido = (Chiste) query.getSingleResult();
+                
+                request.setAttribute("chiste", chisteIntroducido);
+                dispatcher = request.getRequestDispatcher("chiste.jsp");
+                dispatcher.forward(request, response);
+            }
         }
-        
-        dispatcher = request.getRequestDispatcher("home.jsp");
-        dispatcher.forward(request, response);
         
     }
 
