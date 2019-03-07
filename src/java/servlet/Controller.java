@@ -51,8 +51,9 @@ public class Controller extends HttpServlet {
         Query query;
         EntityManager em = null;
         EntityTransaction transaction;
-        List <Chiste> chistes = null;
-        List<Categoria> categorias = null;
+        List <Chiste> chistes;
+        List<Categoria> categorias;
+        Short idCategoria;
         
         if (em == null) {
             em = JPAUtil.getEntityManagerFactory().createEntityManager();
@@ -71,15 +72,12 @@ public class Controller extends HttpServlet {
             dispatcher.forward(request, response);
             
         } else if(op.equals("categoria")){
-            String idcategoria = request.getParameter("idCategoria");
-            
-            sql = "select c from Chiste c where c.idcategoria.id = :id";
-            query = em.createQuery(sql);
-            query.setParameter("id",Short.parseShort(idcategoria));
-            chistes = query.getResultList();
+            idCategoria = Short.parseShort(request.getParameter("idCategoria"));
+            Categoria categoria = em.find(Categoria.class, idCategoria);
+            chistes = categoria.getChisteList();
             
             session.setAttribute("chistes",chistes);
-            session.setAttribute("idCategoria",idcategoria);
+            session.setAttribute("idCategoria",idCategoria.toString());
             session.setAttribute("viewMejores",false);
             
             dispatcher = request.getRequestDispatcher("home.jsp");
@@ -110,20 +108,18 @@ public class Controller extends HttpServlet {
             transaction.begin();
             em.persist(votacion);
             transaction.commit();
-            em.refresh(chiste);
-            Categoria categoria = em.find(Categoria.class, chiste.getIdcategoria().getId());
-            em.refresh(categoria);
+            
+//            em.refresh(chiste);
+//            Categoria categoria = em.find(Categoria.class, chiste.getIdcategoria().getId());
+//            em.refresh(categoria);
             em.getEntityManagerFactory().getCache().evictAll();
             
             Boolean mejores = (Boolean) session.getAttribute("viewMejores");
             
             if (mejores == false) {
-                String idcategoria = (String) session.getAttribute("idCategoria");
-
-                sql = "select c from Chiste c where c.idcategoria.id = :id";
-                query = em.createQuery(sql);
-                query.setParameter("id",Short.parseShort(idcategoria));
-                chistes = query.getResultList();
+                idCategoria = Short.parseShort((String) session.getAttribute("idCategoria"));
+                Categoria categoria = em.find(Categoria.class, idCategoria);
+                chistes = categoria.getChisteList();
 
             } else {
                 sql = "select p.idchiste from Puntos p group by p.idchiste order by avg(p.puntos) DESC";
@@ -158,8 +154,8 @@ public class Controller extends HttpServlet {
         } else if (op.equals("addChiste")) {
             String apodo = request.getParameter("textApodo");
             String descripcion = request.getParameter("textDescripcion");
-            String idCategoria = request.getParameter("selectChiste");
-            Categoria categoria = em.find(Categoria.class, Short.parseShort(idCategoria));
+            idCategoria = Short.parseShort(request.getParameter("selectChiste"));
+            Categoria categoria = em.find(Categoria.class, idCategoria);
             String titulo = request.getParameter("textTitulo");
             
             Chiste chiste = new Chiste();
@@ -176,7 +172,7 @@ public class Controller extends HttpServlet {
             
             String categoriaActual = (String) session.getAttribute("idCategoria");
             
-            if (idCategoria.equals(categoriaActual)) {
+            if (idCategoria.toString().equals(categoriaActual)) {
                 
                 sql = "select c from Chiste c where c.id in (select max(c.id) from Chiste c)";
                 query = em.createQuery(sql);
