@@ -193,9 +193,6 @@
                                 <input type="text" class="form-control" id="textTitulo" name="textTitulo" >
                             </div>
                         </div>
-                        <div class="form-group row">
-                            <input type="hidden" name="op" value="nuevoChiste">
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
